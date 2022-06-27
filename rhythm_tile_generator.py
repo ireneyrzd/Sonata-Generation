@@ -21,6 +21,7 @@ with open('20-notes.csv') as csv_file:
 high_voice = []
 low_voice = []
 notes_in_onset = []
+mid_notes_in_measure = []
 row_num = 0
 for onset in range(0, int(data[-1][0]) + 1):
     row_num_old = row_num
@@ -38,6 +39,8 @@ for onset in range(0, int(data[-1][0]) + 1):
                 low_voice.append(data[row_num_old])
             else: 
                 high_voice.append(data[row_num_old])
+
+    
     
 # print('low: ')
 # print(low_voice)
