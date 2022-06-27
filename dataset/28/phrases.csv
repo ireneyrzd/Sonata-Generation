@@ -1,0 +1,21 @@
+0,12,exp,1st,a
+12,18,exp,tr,a'
+18,34.5,exp,tr,a''
+33,46.5,exp,tr,b
+46.5,73,exp,2nd,c
+72,79,exp,coda,d
+78,85,exp,coda,d
+84,102,exp,coda,e
+102,121,dev,d1,a'''
+120,154.5,dev,d1,a''''
+154.5,163,dev,rtr,f
+162,171.5,rec,1st,a'''''
+171,189,rec,tr,a''''''
+189,202.5,rec,tr,b
+202.5,229,"rec ",2nd,c
+228,235,rec,coda,d
+234,241,rec,coda,d
+240,261.5,rec,coda,e'
+261.5,273.5,rec,coda,c'
+273,286,rec,coda,g
+287.5,306,rec,coda,c''
