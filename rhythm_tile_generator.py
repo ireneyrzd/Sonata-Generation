@@ -1,3 +1,4 @@
+from re import A, X
 import numpy as np
 import pandas as pd
 import csv
@@ -20,28 +21,12 @@ with open('20-notes.csv') as csv_file:
 #split data into high (RH) and low (LH) voice
 high_voice = []
 low_voice = []
-notes_in_onset = []
-mid_notes_in_measure = []
-row_num = 0
-for onset in range(0, int(data[-1][0]) + 1):
-    row_num_old = row_num
-    while row_num < len(data) and data[row_num][0] <= onset:
-        notes_in_onset.append(data[row_num][1])
-        row_num += 1  
-    notes_in_onset.sort()
-    #print(notes_in_onset)
-    mid_note = (notes_in_onset[0] + notes_in_onset[-1])/2
-    for x in range(row_num_old, row_num):
-        if notes_in_onset[-1] - notes_in_onset[0] <= 4: #assume only one voice
-            mid_note = 60
-        else: #assume two voices
-            if data[row_num_old][1] <= mid_note:
-                low_voice.append(data[row_num_old])
-            else: 
-                high_voice.append(data[row_num_old])
+for i in range(len(data)):
+    if data[i][-2] == 1:
+        low_voice.append(data[i])
+    else: 
+        high_voice.append(data[i])
 
-    
-    
 # print('low: ')
 # print(low_voice)
 # print()
@@ -54,19 +39,18 @@ def create_transition(data_list):
     #remove instances of stacked notes in data with equal length 
     # !! needs better chord analysis
     data_short = []
-    for i in range(len(data)-1):
-        if not(data[i][0] == data[i+1][0] and data[i][3] == data[i+1][3]):
-            data_short.append(data[i])
+    for i in range(len(data_list)-1):
+        if not(data_list[i][0] == data_list[i+1][0] and data_list[i][3] == data_list[i+1][3]):
+            data_short.append(data_list[i])
     #print(data_short)
     states = [] #sorted array with all possible note values
     note_val = [] #column 4 of data, sequenced note value
-    for i in range(len(data)):
-        note_val.append(data[i][3])
-        if data[i][3] not in states:
-            states.append(data[i][3])
+    for i in range(len(data_short)):
+        note_val.append(data_short[i][3])
+        if data_short[i][3] not in states:
+            states.append(data_short[i][3])
     states.sort()
     #print(states)
-    #print(note_val)
     transition = pd.crosstab(pd.Series(note_val[1:],name='succeeding note value'),
                              pd.Series(note_val[:-1],name='current note value'),normalize=1)
     print(transition)
