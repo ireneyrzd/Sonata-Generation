@@ -33,7 +33,7 @@ for i in range(len(data)):
         high_voice.append(data[i])
 
 def append_rest(arr, data, rest_duration):
-    arr.append([str(data[0] + data[3]), '0.0', '0.0', str(rest_duration), str(data[4]), str(data[5]), 'R'])
+    arr.append([str(data[0] + data[3]), '0.0', '0.0', rest_duration, str(data[4]), str(data[5]), 'R'])
       
 #adds rests into data
 #label duration R for rest
@@ -58,6 +58,9 @@ def adds_rests(dataset, file_name):
             append_rest(data, dataset[i], rest_dur)
                                       
         i+=1
+    for i in range(len(data)):
+        data[i][0] = str(round(float(data[i][0]), 9))
+        data[i][3] = str(round(float(data[i][3]), 9))
     with open(file_name, 'w') as csv_file:
         csv_writer = csv.writer(csv_file)
         csv_writer.writerows(data)
@@ -87,9 +90,10 @@ def create_transition(data_list, file_name):
     states = [] #sorted array with all possible note values
     note_val = [] #column 4 of data, sequenced note value
     for i in range(len(data_short)):
-        note_val.append(data_short[i][3] + data_short[i][6])
-        if data_short[i][3] + data_short[i][6] not in states:
-            states.append(data_short[i][3] + data_short[i][6])
+        dur = str(round(float(data_short[i][3]), 12))
+        note_val.append(dur + data_short[i][6])
+        if dur + data_short[i][6] not in states:
+            states.append(dur + data_short[i][6])
     states.sort()
     #print(states)
     transition = pd.crosstab(pd.Series(note_val[1:],name='succeeding note value'),
