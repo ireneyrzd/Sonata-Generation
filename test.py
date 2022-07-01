@@ -32,26 +32,20 @@ for i in range(len(data)):
     else: 
         high_voice.append(data[i])
 
-#adds a row that indicates a rest
-def append_rest(arr, data, rest_duration, onset, mes):
-    arr.append([str(float(onset)), '0.0', '0.0', rest_duration, str(data[4]), str(mes), 'R'])
-#splits the rests into reasonable length then append      
-def split_n_append_rest(arr, data, rest_duration, onset, mes):
+def append_rest(arr, data, rest_duration):
     if rest_duration == 1.5:
-        append_rest(arr, data, '1.0', onset, mes)
-        append_rest(arr, data, '0.5', onset, mes)
+        append_rest(arr, data, '1.0')
+        append_rest(arr, data, '0.5')
     elif rest_duration == 2.5:
-        append_rest(arr, data, '2.0', onset, mes)
-        append_rest(arr, data, '0.5', onset, mes)
-    elif rest_duration == 3.0:
-        append_rest(arr, data, '2.0', onset, mes)     
-        append_rest(arr, data, '1.0', onset, mes)
+        append_rest(arr, data, '2.0')
+        append_rest(arr, data, '0.5')
+    elif rest_duration == 3:
+        append_rest(arr, data, '2.0')     
+        append_rest(arr, data, '1.0')
     elif rest_duration == 3.5:
-        append_rest(arr, data, '2.0', onset, mes)
-        append_rest(arr, data, '1.0', onset, mes)
-        append_rest(arr, data, '0.5', onset, mes)     
-    else:
-        append_rest(arr, data, str(rest_duration), onset, mes)   
+        append_rest(arr, data, '1.0')
+        append_rest(arr, data, '0.5')     
+    arr.append([str(data[0] + data[3]), '0.0', '0.0', rest_duration, str(data[4]), str(data[5]), 'R'])
 
 #adds rests into data
 #label duration R for rest
@@ -72,30 +66,21 @@ def adds_rests(dataset, file_name):
             #print('n')
             data.append(np.append(dataset[i], 'N'))
         rest_dur = dataset[i+1][0] - dataset[i][0] - dataset[i][3]
+        onset_left = 4-dataset[i][0]
         if (dataset[i+1][0] - dataset[i][0] > 0.0001 and rest_dur > 0.0001):
             #print('r')
-            onset_left = 4-(dataset[i][0]+dataset[i][3])%4
-            while rest_dur > onset_left:
-                # print('rest_dur' + str(rest_dur))
-                # print('onset_left' + str(onset_left))
-                mes = dataset[i][5]
-                onset = dataset[i][0] + dataset[i][3]
-                split_n_append_rest(data, dataset[i], onset_left, onset, mes)
-                rest_dur = rest_dur - onset_left
-                onset_left = 4
-                mes+=1
-                onset = (int(dataset[i][0]/4)+1)*4
-                if rest_dur <= onset_left:
-                    split_n_append_rest(data, dataset[i], rest_dur, onset, mes)
-                    break
+            while rest_dur > onset_left%4:
+                append_rest(data, dataset[i], onset_left)
+                append_rest(data, dataset[i], rest_dur - onset_left)
             else:
-                split_n_append_rest(data, dataset[i], rest_dur, dataset[i][0] + dataset[i][3], dataset[i][5])
-        # print(data[i])                          
+                append_rest(data, dataset[i], rest_dur)
+                                      
         i+=1
     with open(file_name, 'w') as csv_file:
         csv_writer = csv.writer(csv_file)
         csv_writer.writerows(data)
     return data
+
 
 high_voice = adds_rests(high_voice, 'higher_voice.csv')
 low_voice = adds_rests(low_voice, 'lower_voice.csv')
@@ -120,10 +105,9 @@ def create_transition(data_list, file_name):
     states = [] #sorted array with all possible note values
     note_val = [] #column 4 of data, sequenced note value
     for i in range(len(data_short)):
-        dur = str(round(float(data_short[i][3]), 12))
-        note_val.append(dur + data_short[i][6])
-        if dur + data_short[i][6] not in states:
-            states.append(dur + data_short[i][6])
+        note_val.append(str(data_short[i][3]) + data_short[i][6])
+        if str(data_short[i][3]) + data_short[i][6] not in states:
+            states.append(str(data_short[i][3]) + data_short[i][6])
     states.sort()
     #print(states)
     transition = pd.crosstab(pd.Series(note_val[1:],name='succeeding note value'),
