@@ -37,6 +37,7 @@ def append_rest(arr, data, rest_duration, onset, mes):
     arr.append([str(float(onset)), '0.0', '0.0', rest_duration, str(data[4]), str(mes), 'R'])
 #splits the rests into reasonable length then append      
 def split_n_append_rest(arr, data, rest_duration, onset, mes):
+    # !! needs to determine order
     if rest_duration == 1.5:
         append_rest(arr, data, '1.0', onset, mes)
         append_rest(arr, data, '0.5', onset, mes)
@@ -58,6 +59,7 @@ def split_n_append_rest(arr, data, rest_duration, onset, mes):
 #label duration C for chords/interval
 #label duration N for notes
 def adds_rests(dataset, file_name):
+    # !! last column not added
     data = []
     i = 0
     while i < len(dataset)-1:
@@ -110,8 +112,7 @@ low_voice = adds_rests(low_voice, 'lower_voice.csv')
 
 #create transition vectors
 def create_transition(data_list, file_name):
-    #remove instances of stacked notes in data with equal length 
-    # !! needs better chord analysis
+    #remove instances of stacked notes in data with equal length
     data_short = []
     for i in range(len(data_list)-1):
         if is_chord(data[i][0], data[i][3], data[i+1][0], data[i+1][3]):
