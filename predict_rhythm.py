@@ -30,11 +30,21 @@ def predict_rhythm(transition_file_name):
     rhythm = [start]
     index = 0
     for i in range(number_of_onsets):
-        current_state = np.matmul(current_state, transition)
-        for j in range(len(states)-1):
-            if current_state[j+1] > current_state[j]:
-                index = j+1
-        rhythm.append(states[j])
+        current_state = np.random.random()
+        cumulative = 0
+        k = 0
+        found = False
+        while k < len(states)-1 and not found:
+            if states[k] == rhythm[-1]:
+                for j in range(1, len(states)):
+                    cumulative += transition[j][k]
+                    if current_state < cumulative:
+                        index = j
+                        break
+                found = True
+            else:
+                k+=1
+        rhythm.append(states[index])
     return rhythm
 
 print('Right hand rhythm: ')
