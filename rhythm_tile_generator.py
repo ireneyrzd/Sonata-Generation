@@ -74,7 +74,7 @@ def adds_rests(dataset, file_name):
             #print('n')
             data.append(np.append(dataset[i], 'N'))
         rest_dur = dataset[i+1][0] - dataset[i][0] - dataset[i][3]
-        if (dataset[i+1][0] - dataset[i][0] > 0.0001 and rest_dur > 0.0001):
+        if (dataset[i+1][0] - dataset[i][0] > 0.0001 and rest_dur > 0.0001): # magic number to dodge float point error
             #print('r')
             onset_left = 4-(dataset[i][0]+dataset[i][3])%4
             while rest_dur > onset_left:
@@ -112,21 +112,26 @@ low_voice = adds_rests(low_voice, 'lower_voice.csv')
 
 #create transition vectors
 def create_transition(data_list, file_name):
+    data = data_list
     #remove instances of stacked notes in data with equal length
     data_short = []
-    for i in range(len(data_list)-1):
-        if is_chord(data[i][0], data[i][3], data[i+1][0], data[i+1][3]):
-            data_short.append(data_list[i])
+    k = 0
+    while k < len(data_list):
+        #print(data[k])
+        while k+1 < len(data_list) and data[k][-1] == 'C' and data[k+1][-1] == 'C':
+            k+=1
+        data_short.append(data_list[k])
+        k+=1
     #print(data_short)
     states = [] #sorted array with all possible note values
     note_val = [] #column 4 of data, sequenced note value
     for i in range(len(data_short)):
-        dur = str(round(float(data_short[i][3]), 12))
-        note_val.append(dur + data_short[i][6])
+        dur = str(round(float(data_short[i][3]), 9))
+        note_val.append(str(round(1+(float(data_short[i][0])%4),9)) + '_' + dur + data_short[i][6])
         if dur + data_short[i][6] not in states:
-            states.append(dur + data_short[i][6])
+            states.append(str(round(1+(float(data_short[i][0])%4),9)) + '_' + dur + data_short[i][6])
     states.sort()
-    #print(states)
+    #print(note_val)
     transition = pd.crosstab(pd.Series(note_val[1:],name='succeeding note value'),
                              pd.Series(note_val[:-1],name='current note value'),normalize=1)
 
