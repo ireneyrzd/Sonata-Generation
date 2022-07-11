@@ -39,16 +39,17 @@ class Predict:
                 x = self.rhythm[-1]
             #print('state[i]', self.states[i], 'x', x, self.states[i] == x)
             if self.states[i] == x:
-                for j in range(1, len(self.states)):
+                for j in range(len(self.states)):
                     cumulative += self.transition[j][i]
+                    #print(self.transition[j][i])
                     #print('current', current_state, 'cumulative', cumulative, current_state < cumulative)
                     if current_state < cumulative:
+                        #print (self.states[j])
                         return self.states[j]
         return 'Unable to generate rhythm'
 
     def predict(self, num_of_measures, start_note):
         for i in range(num_of_measures):
-            #print (self.rhythm)
             current_onset = 1
             if i == 0:
                 self.rhythm.append(start_note)
@@ -63,26 +64,34 @@ class Predict:
                         index1 = k+1
                         break
                 current_onset += float(current[index1:-1])
-            found = False
-            while current_onset < 4.998 and not found: #reduce float point error
+            while current_onset < 4.998: #reduce float point error
+                #print ('current_onset', current_onset)
                 self.rhythm.append(self.find_note(False))
                 current = self.rhythm[-1]
+                #print('current', current)
                 index1 = 0
                 for k in range(len(current)):
                     if current[k] == '_':
                         index1 = k+1
-                        found = True
                         break
                 current_onset += float(current[index1:-1])
+                # ('current_onset', current_onset)
+                #print(current_onset < 4.998)
             #self.rhythm.append('|')
         #print('rhythm', self.rhythm)
         self.last_note = self.rhythm[-1]
-        return self.rhythm
+        temp = self.rhythm
+        self.rhythm = []
+        return temp
 
 
 # rh = Predict("high_voice_transition.csv")
-# rh_theme1 = rh.predict(4, '1.0N')
+# rh_theme1 = rh.predict(16, '1.0_1.0N')
 # print(rh_theme1) #sentence 1
+
+# lh = Predict("low_voice_transition.csv")
+# lh_theme1 = lh.predict(16, '1.0_1.0N')
+# print(lh_theme1) #sentence 1
 
 # print('Right hand rhythm: ')
 # rh = Predict("high_voice_transition.csv", 4, '1.0N')
