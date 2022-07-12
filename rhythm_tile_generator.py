@@ -2,12 +2,6 @@ import numpy as np
 import pandas as pd
 import csv
 
-#TO DO : if one voice, use middle note decided a previous onsets of the measure to decide voice to accomdate
-# right hand scales that go below central C (eg. measure 79), same thing for left hand. need to create array 
-# to store previous onsets
-# use tuples as representation object structured of chords (length, chord[boolean])
-# consider putting high and low voice in seperate or same matrix
-
 #copy csv data into list data
 data = []
 with open('20-notes.csv') as csv_file:
@@ -73,15 +67,21 @@ def adds_rests(dataset, file_name):
         else:
             #print('n')
             data.append(np.append(dataset[i], 'N'))
-        rest_dur = dataset[i+1][0] - dataset[i][0] - dataset[i][3]
-        if (dataset[i+1][0] - dataset[i][0] > 0.0001 and rest_dur > 0.0001): # magic number to dodge float point error
+        x = i
+        while dataset[x][3] == 0 and x > 0: #remove ornaments from consideration of rests
+            x -= 1
+        val = dataset[x]
+        if val[3] == 0:
+            rest_dur = dataset[i+1][0]%4
+        rest_dur = dataset[i+1][0] - val[0] - val[3]
+        if (dataset[i+1][0] - val[0] > 0.0001 and rest_dur > 0.0001): # magic number to dodge float point error
             #print('r')
-            onset_left = 4-(dataset[i][0]+dataset[i][3])%4
+            onset_left = 4-(val[0]+val[3])%4
             while rest_dur > onset_left:
                 # print('rest_dur' + str(rest_dur))
                 # print('onset_left' + str(onset_left))
-                mes = dataset[i][5]
-                onset = dataset[i][0] + dataset[i][3]
+                mes = val[5]
+                onset = val[0] + val[3]
                 split_n_append_rest(data, dataset[i], onset_left, onset, mes)
                 rest_dur = rest_dur - onset_left
                 onset_left = 4
@@ -118,16 +118,17 @@ def create_transition(data_list, file_name):
     k = 0
     while k < len(data_list):
         #print(data[k])
-        while k+1 < len(data_list) and data[k][-1] == 'C' and data[k+1][-1] == 'C':
+        while k+1 < len(data_list) and data[k][-1] == 'C' and data[k+1][-1] == 'C' and float(data[k+1][0]) - float(data[k][0]) < 0.0001: #magic number to prevent float point error
             k+=1
         data_short.append(data_list[k])
         k+=1
-    #print(data_short)
+    print(data_short)
     states = [] #sorted array with all possible note values
     note_val = [] #column 4 of data, sequenced note value
     for i in range(len(data_short)):
         dur = str(round(float(data_short[i][3]), 9))
         note_val.append(str(round(1+(float(data_short[i][0])%4),9)) + '_' + dur + data_short[i][6])
+        print(data_short[i][-2], note_val[i])
         if dur + data_short[i][6] not in states:
             states.append(str(round(1+(float(data_short[i][0])%4),9)) + '_' + dur + data_short[i][6])
     states.sort()
@@ -141,7 +142,7 @@ def create_transition(data_list, file_name):
 
 
 print('high voice: ')
-print(create_transition(high_voice, 'high_voice_transition.csv'))
-print()
-print('low voice: ')
-print(create_transition(low_voice, 'low_voice_transition.csv'))
+create_transition(high_voice, 'high_voice_transition.csv')
+# print()
+# print('low voice: ')
+# print(create_transition(low_voice, 'low_voice_transition.csv'))

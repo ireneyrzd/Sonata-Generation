@@ -13,7 +13,6 @@ class Predict:
         self.current_onset = 1
         self.last_note = ''
         self.first = False
-        #num_of_onsets = num_of_measures * 4 #time signature
         self.rhythm = [] #output rhythm
 
         #copy csv data into list data
@@ -50,6 +49,7 @@ class Predict:
 
     def predict(self, num_of_measures, start_note):
         for i in range(num_of_measures):
+            print('meausre', i)
             current_onset = 1
             if i == 0:
                 self.rhythm.append(start_note)
@@ -64,7 +64,7 @@ class Predict:
                         index1 = k+1
                         break
                 current_onset += float(current[index1:-1])
-            while current_onset < 4.998: #reduce float point error
+            while current_onset < 4.999999998: #reduce float point error
                 #print ('current_onset', current_onset)
                 self.rhythm.append(self.find_note(False))
                 current = self.rhythm[-1]
@@ -75,7 +75,7 @@ class Predict:
                         index1 = k+1
                         break
                 current_onset += float(current[index1:-1])
-                # ('current_onset', current_onset)
+                print('current_onset', current_onset)
                 #print(current_onset < 4.998)
             #self.rhythm.append('|')
         #print('rhythm', self.rhythm)

@@ -12,6 +12,7 @@ with open('sonata.txt', 'w') as f:
     f.write('Theme 1: \n')
     f.write('Right hand rhythm: \n')
     rh_theme1 = rh.predict(4, '1.0_1.0N')
+    print(rh_theme1)
     f.write(str(rh_theme1) + '\n') #sentence 1
     f.write(str(rh_theme1) + '\n') #setence 2
 
