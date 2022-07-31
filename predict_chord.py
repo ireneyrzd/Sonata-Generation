@@ -2,6 +2,8 @@
 import numpy as np
 import pandas as pd
 import csv
+from random import randint
+
 
 def most_frequent(List):
         counter = 0
@@ -45,6 +47,7 @@ def csv_to_arr(file_name):
             #print(j)
             temp = np.append(temp, chord_data_long[j][-1]).tolist()
         chord_data_short = np.append(chord_data_short, most_frequent(temp))
+    print(chord_data_short)
     return chord_data_short
 
 csv_to_arr('20-chords.csv')
@@ -74,3 +77,37 @@ def create_weight():
     return arr
 
 print(create_weight())
+
+
+# Matthew's code
+arr = create_weight()
+#print(create_weight())
+#END OF PREDICT_CHORD
+num_of_measures = 7
+chordPro = ['I']
+def find_follow(chords):
+    sum = 0
+    current_weight = 0
+    #sum of weights
+    for i in chords:
+        sum += i['weight']
+    print(sum)
+    n = randint(0, sum)
+    print(n)
+    for i in range(len(chords)):
+        current_weight += chords[i]['weight']
+        if n <= current_weight:
+            follow = chords[i]['follow']
+            return follow
+            break
+for i in range(num_of_measures):
+    counter = 0
+    dict_short = []
+    #creates array based off lead chord
+    for x in range(len(arr)):
+        if chordPro[counter] == arr[x]['lead']:
+            dict_short.append(arr[x])
+    print(dict_short)
+    chordPro.append(find_follow(dict_short))
+    counter += 1
+print(chordPro)

@@ -49,7 +49,7 @@ class Predict:
 
     def predict(self, num_of_measures, start_note):
         for i in range(num_of_measures):
-            print('meausre', i)
+            #print('meausre', i)
             current_onset = 1
             if i == 0:
                 self.rhythm.append(start_note)
@@ -64,7 +64,7 @@ class Predict:
                         index1 = k+1
                         break
                 current_onset += float(current[index1:-1])
-            while current_onset < 4.999999998: #reduce float point error
+            while current_onset < 4.998: #reduce float point error
                 #print ('current_onset', current_onset)
                 self.rhythm.append(self.find_note(False))
                 current = self.rhythm[-1]
@@ -75,7 +75,7 @@ class Predict:
                         index1 = k+1
                         break
                 current_onset += float(current[index1:-1])
-                print('current_onset', current_onset)
+                #print('current_onset', current_onset)
                 #print(current_onset < 4.998)
             #self.rhythm.append('|')
         #print('rhythm', self.rhythm)
@@ -85,9 +85,9 @@ class Predict:
         return temp
 
 
-# rh = Predict("high_voice_transition.csv")
-# rh_theme1 = rh.predict(16, '1.0_1.0N')
-# print(rh_theme1) #sentence 1
+rh = Predict("high_voice_transition.csv")
+rh_theme1 = rh.predict(16, '1.0_1.0N')
+print(rh_theme1) #sentence 1
 
 # lh = Predict("low_voice_transition.csv")
 # lh_theme1 = lh.predict(16, '1.0_1.0N')
