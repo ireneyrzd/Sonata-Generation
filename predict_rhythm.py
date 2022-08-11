@@ -85,9 +85,9 @@ class Predict:
         return temp
 
 
-rh = Predict("high_voice_transition.csv")
+rh = Predict("high_voice_transition_short.csv")
 rh_theme1 = rh.predict(16, '1.0_1.0N')
-print(rh_theme1) #sentence 1
+# print(rh_theme1) #sentence 1
 
 # lh = Predict("low_voice_transition.csv")
 # lh_theme1 = lh.predict(16, '1.0_1.0N')
