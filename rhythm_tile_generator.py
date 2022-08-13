@@ -10,7 +10,7 @@ def rhythm_transition(n):
     #copy csv data into list data    
     data = []
     with open('dataset/' + str(n) + '/notes.csv') as csv_file:
-        if n == 3 or 9 or 10 or 20:
+        if n == 9 or 20:
             csv_reader = csv.reader(csv_file, delimiter=',', quoting=csv.QUOTE_NONNUMERIC)
             for row in csv_reader:
                 data.append(row)
@@ -161,33 +161,53 @@ def rhythm_transition(n):
 # create transition for 
  
 for i in range(1, 33):
-    rhythm_transition(i)
+    if i == 9 or 20:
+        rhythm_transition(i)
 
 
-def avg_transition(name):
-    def find_states():
-        states = []
-        for i in [3, 9, 10, 20]:
-            data = []
-            with open('rhythm_transition/' + name  + '/' + str(i) + '_' + name + '_transition.csv') as csv_file:
-                csv_reader = csv.reader(csv_file, delimiter=',')
-                for row in csv_reader:
-                    data = (row[1:])
-                    break
-            print(data)
-            for j in range(len(data)):
-                print(data[j])
-                if data[j] not in states:
-                    states.append(data[j])
+# def avg_transition(name):
+#     transition = []
+#     states = []
+#     for i in [9, 20]:
+#         temp = []
+#         with open('rhythm_transition/' + name  + '/' + str(i) + '_' + name + '_transition.csv') as csv_file:
+#             csv_reader = csv.reader(csv_file, delimiter=',')
+#             for row in csv_reader:
+#                 temp = temp + row[1:]
+#                 break
+#         for i in range(len(temp)):
+#             if temp[i] not in states:
+#                 states = states + [temp[i]]
+#     states.sort()
+#     print(states)
+#     for i in [9, 20]:
+#         data = []
+#         with open('rhythm_transition/' + name  + '/' + str(i) + '_' + name + '_transition.csv') as csv_file:
+#             csv_reader = csv.reader(csv_file, delimiter=',')
+#             for row in csv_reader:
+#                 data.append(row)
+#         for i in range(len(states) + 1):
+#             for j in range(len(states) + 1):
+#                 if i == 0 and j == 0:
+#                     transition[i][j] = 0
+#                 elif i == 0:
+#                     transition[0][i] = states[i-1]
+#                 elif j == 0:
+#                     transition[j][0] = states[i-1]
+#         for i in range(len(data)):
+#             for j in range(len(data)):
+#                 if data[i][j]
+                    
+
+                
+#     for i in range(1, len(data[0])):
+#         states.append(data[0][i])
+#         transition.append(data[i])
+
+
             
-        states.sort()
-        print(states)
-    
-    find_states()
-
-            
 
 
 
-avg_transition('high_voice')
+# avg_transition('high_voice')
 # avg_transition('low_voice')

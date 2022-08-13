@@ -14,7 +14,7 @@ def predict_section(mes, hand):
     
     chord = predict_chord(n)
     if hand == 0:
-        rh = Predict("high_voice_transition_short.csv")
+        rh = Predict("high_voice_transition.csv")
         rhythm = rh.predict(n, '1.0_1.0N')
     else:
         lh = Predict("low_voice_transition.csv",)

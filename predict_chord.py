@@ -71,7 +71,7 @@ def rule(weight, lead, follow): #rules, length?
 def create_weight():
     arr = []
     data = []
-    for i in [3, 9, 10, 20]:
+    for i in [20]:
         data = np.concatenate((data, csv_to_arr('dataset/' + str(i) + '/chords.csv')))
     for i in range (len(data) - 1):
         found = False

@@ -24,7 +24,7 @@ def predict_note(chord_prog, rhythm, hand):
 
     # initialize chord_data
     chord_data = []
-    for i in [3, 9, 10, 20]:
+    for i in [20]:
         chord_data = np.concatenate((chord_data, csv_to_arr('dataset/' + str(i) + '/chords.csv')))
   
 
@@ -32,10 +32,10 @@ def predict_note(chord_prog, rhythm, hand):
     file_name = 'higher_voice.csv'
     if hand == 1:
         file_name = 'lower_voice.csv'
-        root = 48
+        root = 48.0
     note_data = []
     for i in range(1, 33):
-        if i == 3 or 9 or 10 or 20:
+        if i == 20:
             with open('dataset/' + str(i) + '/' + file_name) as csv_file:
                 csv_reader = csv.reader(csv_file, delimiter=',')
                 for row in csv_reader:
@@ -64,7 +64,7 @@ def predict_note(chord_prog, rhythm, hand):
     # third col = int: midi note value of current key
     def find_mod():
         chord_data_long = []
-        for i in [3, 9, 10, 20]:
+        for i in [20]:
             with open('dataset/' + str(i) + '/chords.csv') as csv_file:
                 csv_reader = csv.reader(csv_file, delimiter=',')
                 for row in csv_reader:
@@ -157,8 +157,8 @@ def predict_note(chord_prog, rhythm, hand):
                 note_rule[chord_prog[i]]
                 midi_notes = {}
                 for key in note_rule[chord_prog[i]]:
-                    if root + key >= 48.0:
-                        midi_notes[root + key] = note_rule[chord_prog[i]][key]
+                    # if root + key >= 48.0:
+                    midi_notes[root + key] = note_rule[chord_prog[i]][key]
                 midi_notes = dict(sorted(midi_notes.items()))
                 tile.append([chord_prog[i], midi_notes])
         print('tile', tile)
