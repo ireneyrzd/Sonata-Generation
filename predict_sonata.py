@@ -6,68 +6,75 @@ import pandas as pd
 import numpy as np
 
 
-# def predict_section(mes)
 
-n = 4 #number of measures
+def predict_section(mes, hand):
 
-chord = predict_chord(n)
-rhythm = rh.predict(n, '1.0_1.0N')
-
-notes_in_mes = []
-for i in range(n):
-    notes_in_mes.append(0)
-mes = 0
-for i in range(len(rhythm) - 1):
-    if not rhythm[i][:-1] == 'R':
-        notes_in_mes[mes] += 1
-        if rhythm[i+1][:find_index(rhythm[i+1])] < rhythm[i][:find_index(rhythm[i])]:
-            mes += 1
-if not rhythm[-1][:-1] == 'R':
-    notes_in_mes[-1] += 1
-# print(notes_in_mes)
-
-# print('chord', chord)
-notes = predict_note(chord, notes_in_mes)
-
-print(chord)
-print(rhythm)
-print(notes)
-
-output = [] #[Onset, MIDI note value, note duration, RH or LH, measure number, type]
-onset = 0.0
-note_num = 0
-mes = 1
-for i in range(len(rhythm)):
-    if rhythm[i][:-1] == 'R':
-        output.append([onset, 0.0, float(rhythm[i][find_index(rhythm[i])+1:-1]), 0, mes, rhythm[i][:-1]])
-        note_num -= 1
+    n = mes #number of measures
+    
+    
+    chord = predict_chord(n)
+    if hand == 0:
+        rh = Predict("high_voice_transition_short.csv")
+        rhythm = rh.predict(n, '1.0_1.0N')
     else:
-        output.append([onset, notes[note_num], float(rhythm[i][find_index(rhythm[i])+1:-1]), 0, mes, rhythm[i][-1:]])
-    if output[-1][-1] == 'C':
-        output.append([onset, notes[note_num] - 4, float(rhythm[i][find_index(rhythm[i])+1:-1]), 0, mes, rhythm[i][-1:]]) # M3 down
-    #update note_num
-    note_num += 1
-    #update mes num
-    if i < len(rhythm) - 1:
-        if rhythm[i+1][:find_index(rhythm[i+1])] < rhythm[i][:find_index(rhythm[i])]:
-            mes += 1
-    #update onset
-    onset += round(float(rhythm[i][find_index(rhythm[i])+1:-1]), 9)
-    onset = round(onset, 9)
-    if str(onset)[-1] == '9':
-        onset += 0.000000001
-    #print(onset)
+        lh = Predict("low_voice_transition.csv",)
+        rhythm = lh.predict(n, '1.0_1.0N')
 
-print(output)
+    notes_in_mes = []
+    for i in range(n):
+        notes_in_mes.append(0)
+    mes = 0
+    for i in range(len(rhythm) - 1):
+        if not rhythm[i][:-1] == 'R':
+            notes_in_mes[mes] += 1
+            if rhythm[i+1][:find_index(rhythm[i+1])] < rhythm[i][:find_index(rhythm[i])]:
+                mes += 1
+    if not rhythm[-1][:-1] == 'R':
+        notes_in_mes[-1] += 1
+    # print(notes_in_mes)
 
-with open('output.csv', 'w') as file:
-    writer = csv.writer(file)
-    writer.writerows(output)
+    # print('chord', chord)
+    notes = predict_note(chord, notes_in_mes, hand)
+
+    print(chord)
+    print(rhythm)
+    print(notes)
+
+    output = [] #[Onset, MIDI note value, note duration, RH or LH, measure number, type]
+    onset = 0.0
+    note_num = 0
+    mes = 1
+    for i in range(len(rhythm)):
+        if rhythm[i][:-1] == 'R':
+            output.append([onset, 0.0, float(rhythm[i][find_index(rhythm[i])+1:-1]), hand, mes, rhythm[i][:-1]])
+            note_num -= 1
+        else:
+            output.append([onset, notes[note_num], float(rhythm[i][find_index(rhythm[i])+1:-1]), hand, mes, rhythm[i][-1:]])
+        if output[-1][-1] == 'C':
+            output.append([onset, notes[note_num] - 4, float(rhythm[i][find_index(rhythm[i])+1:-1]), hand, mes, rhythm[i][-1:]]) # M3 down
+        #update note_num
+        note_num += 1
+        #update mes num
+        if i < len(rhythm) - 1:
+            if rhythm[i+1][:find_index(rhythm[i+1])] < rhythm[i][:find_index(rhythm[i])]:
+                mes += 1
+        #update onset
+        onset += round(float(rhythm[i][find_index(rhythm[i])+1:-1]), 9)
+        onset = round(onset, 9)
+        if str(onset)[-1] == '9':
+            onset += 0.000000001
+        #print(onset)
+
+    print(output)
+
+    with open('output' + str(hand) +'.csv', 'w') as file:
+        writer = csv.writer(file)
+        writer.writerows(output)
+
+predict_section(16, 0)
+predict_section(16, 1)
 
 
-
-# rh = Predict("high_voice_transition.csv")
-# lh = Predict("low_voice_transition.csv",)
 
 # with open('sonata.txt', 'w') as f:
 #     # Exposition
@@ -123,7 +130,7 @@ with open('output.csv', 'w') as file:
 
 #     f.write('Theme 1 Recap: \n')
 #     f.write('Right hand rhythm: \n')
-#     f.write(str(rh_theme1) + '\n') #sentence 1
+#     f.write(str(rh_theme1) + '\n') #sentence  
 #     f.write(str(rh_theme1) + '\n') #setence 2
 
 #     f.write('Left hand rhythm: \n')

@@ -10,9 +10,10 @@ def rhythm_transition(n):
     #copy csv data into list data    
     data = []
     with open('dataset/' + str(n) + '/notes.csv') as csv_file:
-        csv_reader = csv.reader(csv_file, delimiter=',', quoting=csv.QUOTE_NONNUMERIC)
-        for row in csv_reader:
-            data.append(row)
+        if n == 3 or 9 or 10 or 20:
+            csv_reader = csv.reader(csv_file, delimiter=',', quoting=csv.QUOTE_NONNUMERIC)
+            for row in csv_reader:
+                data.append(row)
 
     #return true if two notes are in an interval/chord
     def is_chord(a1, a2, b1, b2):
@@ -148,9 +149,9 @@ def rhythm_transition(n):
         df = pd.DataFrame(transition)
         df.to_csv(file_name)
         if 'high' in file_name:
-            shutil.move(file_name, 'rhythm_transition/higher_voice/')
+            shutil.move(file_name, 'rhythm_transition/high_voice/')
         else:
-            shutil.move(file_name, 'rhythm_transition/lower_voice/')
+            shutil.move(file_name, 'rhythm_transition/low_voice/')
         return transition
 
     create_transition(high_voice, str(n) + '_high_voice_transition.csv')
@@ -158,22 +159,35 @@ def rhythm_transition(n):
 
 
 # create transition for 
+ 
 for i in range(1, 33):
     rhythm_transition(i)
 
 
 def avg_transition(name):
-    def find_states(data):
+    def find_states():
         states = []
-        for i in range(1, 33):
+        for i in [3, 9, 10, 20]:
             data = []
-            with open('rhythm_transition/' + name  + '/' + str(i) + '_high_voice_transition.csv') as csv_file:
-                csv_reader = csv.reader(csv_file, delimiter=',', quoting=csv.QUOTE_NONNUMERIC)
+            with open('rhythm_transition/' + name  + '/' + str(i) + '_' + name + '_transition.csv') as csv_file:
+                csv_reader = csv.reader(csv_file, delimiter=',')
                 for row in csv_reader:
-                    data.append(row)
+                    data = (row[1:])
+                    break
+            print(data)
+            for j in range(len(data)):
+                print(data[j])
+                if data[j] not in states:
+                    states.append(data[j])
+            
+        states.sort()
+        print(states)
+    
+    find_states()
+
             
 
 
 
-avg_transition('higher_voice')
-avg_transition('lower_voice')
+avg_transition('high_voice')
+# avg_transition('low_voice')

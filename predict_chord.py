@@ -46,10 +46,9 @@ def csv_to_arr(file_name):
     # #print(chord_data_long)
 
     chord_data_short = []
-    for i in range(0, len(chord_data_long), 4):
+    for i in range(0, len(chord_data_long) - 4, 4):
         temp = []
         for j in range(i, i+4):
-            #print(j)
             temp = np.append(temp, chord_data_long[j][-1]).tolist()
         chord_data_short = np.append(chord_data_short, most_frequent(temp))
     # print(chord_data_short)
@@ -71,16 +70,20 @@ def rule(weight, lead, follow): #rules, length?
 # for chord, store note/symbol/distance from root
 def create_weight():
     arr = []
-    data = csv_to_arr('20-chords.csv')
+    data = []
+    for i in [3, 9, 10, 20]:
+        data = np.concatenate((data, csv_to_arr('dataset/' + str(i) + '/chords.csv')))
     for i in range (len(data) - 1):
         found = False
         for j in range(len(arr)):
+            
             if arr[j]["lead"] == data[i] and arr[j]["follow"] == data[i+1]:
                 arr[j]['weight'] += 1
                 found = True
                 break
         if not found:
             arr.append(rule(1, data[i], data[i+1]))
+    # print(data)
     return arr
 
 #print(create_weight())
@@ -121,5 +124,5 @@ def predict_chord(n):
 
     return chordPro
 
-# chord_prog = predict_chord()
+# chord_prog = predict_chord(16)
 # print (chord_prog)

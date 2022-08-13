@@ -9,35 +9,6 @@ import math
 import random
 
 
-# initialize root note:
-root = 60.0
-
-# initialize chord_data
-chord_data = csv_to_arr('20-chords.csv')
-
-# initialize note_data
-note_data = []
-with open('20-higher_voice.csv') as csv_file:
-    csv_reader = csv.reader(csv_file, delimiter=',')
-    for row in csv_reader:
-        note_data.append(row)
-k = 0
-temp=[]
-while k < len(note_data):
-    #print(data[k])
-    while k+1 < len(note_data) and note_data[k][-1] == 'C' and note_data[k+1][-1] == 'C' and float(note_data[k+1][0]) - float(note_data[k][0]) < 0.0001: #magic number to prevent float point error
-        k+=1
-    while note_data[k][-1] == 'R' or float(note_data[k][3]) == 0.0:
-        k+=1
-    if k < len(note_data):
-        a = note_data[k]
-        arr = [a[0], a[1], a[-1]]
-        temp.append(arr)
-    k+=1
-note_data = temp
-# print(note_data)
-# print(chord_data)
-
 # find index of '_'
 def find_index(str):
     index = 0
@@ -47,93 +18,130 @@ def find_index(str):
             break
     return index
 
+def predict_note(chord_prog, rhythm, hand):
+    # initialize root note:
+    root = 60.0
 
-# initialize a 2D array that shows where modulation happen in music
-# first col = int: measure of modulation
-# second col = string: current key
-# third col = int: midi note value of current key
-def find_mod():
-    chord_data_long = []
-    with open('20-chords.csv') as csv_file:
-        csv_reader = csv.reader(csv_file, delimiter=',')
-        for row in csv_reader:
-            chord_data_long.append(row)
-    mod = []
-    mod.append([1, chord_data_long[0][2], str2midi(chord_data_long[0][2] + '4')])
+    # initialize chord_data
+    chord_data = []
+    for i in [3, 9, 10, 20]:
+        chord_data = np.concatenate((chord_data, csv_to_arr('dataset/' + str(i) + '/chords.csv')))
+  
+
+    # initialize note_data
+    file_name = 'higher_voice.csv'
+    if hand == 1:
+        file_name = 'lower_voice.csv'
+        root = 48
+    note_data = []
+    for i in range(1, 33):
+        if i == 3 or 9 or 10 or 20:
+            with open('dataset/' + str(i) + '/' + file_name) as csv_file:
+                csv_reader = csv.reader(csv_file, delimiter=',')
+                for row in csv_reader:
+                    note_data.append(row)
     k = 0
-    for i in range(len(chord_data_long)-1):
-        if not chord_data_long[i][2] == chord_data_long[i+1][2]:
-            mod.append([math.floor(float(chord_data_long[i+1][0])/4 + 1), chord_data_long[i+1][2], str2midi(chord_data_long[i+1][2] + '4')])
-    return mod
-
-mod = find_mod()
-
-# print(chord_data)
-# print('mod: ', mod)
-
-
-
-# create a dictionary that defines the half step rule
-# key: number of half steps from the previous note (+ for going up, - for going down)
-# counter: the number of time this change in half step occurs in the corpus
-def create_hs_rule():
-    def subtract(array):
-        halfsteps = []
-        for i in range(len(array) - 1):
-            halfsteps.append(float(note_data[i+1][1]) - float(note_data[i][1]))
-        return halfsteps
-
-    halfsteps = subtract(note_data)
-    halfsteps.sort(reverse = True)
-    halfdict = Counter(halfsteps)
-    hs_rule = {key:value for key, value in sorted(halfdict.items(), key=lambda item: int(item[0]), reverse = True)}
-    # print(hs_rule)
-    return hs_rule
-
-
-hs_rule = create_hs_rule()
-# print('hs_rule: ', hs_rule)
-
-
-# create a nested dictionary that defines the notes that can exsist in a given chord
-# eg. dict {
-#     'I': dict{  <-- chord name
-#         '0': 5  <-- key = half step from root, val = weight
-#         '2': 9
-#     }
-#     'I42': dict{
-#        .
-#        .
-#        .
-#     }
-# }
-def create_note_rule():
-    note_rule = {}
-    k = 0
-    j = 0
-    key = mod[0][2]
-    for i in range(len(chord_data)): # for each measure
-        if chord_data[i] not in note_rule:
-            note_rule[chord_data[i]] = {}
-        while float(note_data[k][0]) < (i+1)*4 and k < len(note_data) - 1:
-            # find root note
-            if j < len(mod) and i > mod[j][0]:
-                key = mod[j][2]
-                j+=1
-                # print(i, key)
-            # initialize note in nested array
-            hs = float(note_data[k][1]) - key
-            note_rule[chord_data[i]][hs] = note_rule[chord_data[i]].get(hs, 0)
-            # change value
-            note_rule[chord_data[i]][hs] += 1
+    temp=[]
+    while k < len(note_data):
+        #print(data[k])
+        while k+1 < len(note_data) and note_data[k][-1] == 'C' and note_data[k+1][-1] == 'C' and float(note_data[k+1][0]) - float(note_data[k][0]) < 0.0001: #magic number to prevent float point error
             k+=1
-    return note_rule
+        while note_data[k][-1] == 'R' or float(note_data[k][3]) == 0.0:
+            k+=1
+        if k < len(note_data):
+            a = note_data[k]
+            arr = [a[0], a[1], a[-1]]
+            temp.append(arr)
+        k+=1
+    note_data = temp
+    print(note_data)
+    print(chord_data)
 
-note_rule = create_note_rule()
-# print('note_rule: ', note_rule)
+
+    # initialize a 2D array that shows where modulation happen in music
+    # first col = int: measure of modulation
+    # second col = string: current key
+    # third col = int: midi note value of current key
+    def find_mod():
+        chord_data_long = []
+        for i in [3, 9, 10, 20]:
+            with open('dataset/' + str(i) + '/chords.csv') as csv_file:
+                csv_reader = csv.reader(csv_file, delimiter=',')
+                for row in csv_reader:
+                    chord_data_long.append(row)
+        mod = []
+        mod.append([1, chord_data_long[0][2], str2midi(chord_data_long[0][2] + '4')])
+        for i in range(len(chord_data_long)-1):
+            if not chord_data_long[i][2] == chord_data_long[i+1][2]:
+                mod.append([math.floor(float(chord_data_long[i+1][0])/4 + 1), chord_data_long[i+1][2], str2midi(chord_data_long[i+1][2] + '4')])
+        return mod
+
+    mod = find_mod()
+
+    # print(chord_data)
+    # print('mod: ', mod)
 
 
-def predict_note(chord_prog, rhythm):
+
+    # create a dictionary that defines the half step rule
+    # key: number of half steps from the previous note (+ for going up, - for going down)
+    # counter: the number of time this change in half step occurs in the corpus
+    def create_hs_rule():
+        def subtract(array):
+            halfsteps = []
+            for i in range(len(array) - 1):
+                halfsteps.append(float(note_data[i+1][1]) - float(note_data[i][1]))
+            return halfsteps
+
+        halfsteps = subtract(note_data)
+        halfsteps.sort(reverse = True)
+        halfdict = Counter(halfsteps)
+        hs_rule = {key:value for key, value in sorted(halfdict.items(), key=lambda item: int(item[0]), reverse = True)}
+        # print(hs_rule)
+        return hs_rule
+
+
+    hs_rule = create_hs_rule()
+    print('hs_rule: ', hs_rule)
+
+
+    # create a nested dictionary that defines the notes that can exsist in a given chord
+    # eg. dict {
+    #     'I': dict{  <-- chord name
+    #         '0': 5  <-- key = half step from root, val = weight
+    #         '2': 9
+    #     }
+    #     'I42': dict{
+    #        .
+    #        .
+    #        .
+    #     }
+    # }
+    def create_note_rule():
+        note_rule = {}
+        k = 0
+        j = 0
+        key = mod[0][2]
+        for i in range(len(chord_data)): # for each measure
+            if chord_data[i] not in note_rule:
+                note_rule[chord_data[i]] = {}
+            while float(note_data[k][0]) < (i+1)*4 and k < len(note_data) - 1:
+                # find root note
+                if j < len(mod) and i > mod[j][0]:
+                    key = mod[j][2]
+                    j+=1
+                    # print(i, key)
+                # initialize note in nested array
+                hs = float(note_data[k][1]) - key
+                note_rule[chord_data[i]][hs] = note_rule[chord_data[i]].get(hs, 0)
+                # change value
+                note_rule[chord_data[i]][hs] += 1
+                k+=1
+        return note_rule
+
+    note_rule = create_note_rule()
+    print('note_rule: ', note_rule)
+
     chord_prog = chord_prog
     num_of_notes = rhythm
 
@@ -149,10 +157,11 @@ def predict_note(chord_prog, rhythm):
                 note_rule[chord_prog[i]]
                 midi_notes = {}
                 for key in note_rule[chord_prog[i]]:
-                    midi_notes[root + key] = note_rule[chord_prog[i]][key]
+                    if root + key >= 48.0:
+                        midi_notes[root + key] = note_rule[chord_prog[i]][key]
                 midi_notes = dict(sorted(midi_notes.items()))
                 tile.append([chord_prog[i], midi_notes])
-        print(tile)
+        print('tile', tile)
         return tile
 
     tile = create_tiles()
@@ -192,7 +201,7 @@ def predict_note(chord_prog, rhythm):
         dict = {}
         for key in selected[1][1]:
             weight_before = 0
-            if isinstance(tile[index - 1], float):
+            if isinstance(tile[index - 1], float) or isinstance(tile[index - 1], int):
                 if key - tile[index - 1] in hs_rule:
                     weight_before = hs_rule[key - tile[index - 1]]
             else:
@@ -214,11 +223,12 @@ def predict_note(chord_prog, rhythm):
                     weight_after = round(sum/len(tile[index + 1]))
             dict[key] = round((weight_before + weight_after)/2)
         # print('dict', dict)
+        # print(dict)
         tile[selected[0]] = random.choices(list(dict.keys()), weights=dict.values(), k=1)[0]
                 
     # pick a random block in the selected tile
     def observe(selected):
-        print(selected)
+        # print(selected)
         # print(tile)
         tile[selected[0]] = random.choice(list(selected[1][1].keys()))
 
@@ -272,14 +282,14 @@ def predict_note(chord_prog, rhythm):
         propagate(selected[0])
         if check()[1]:
             print('ERROR')
-    # print(tile)
+    print('tile', tile)
     return tile
 
 
-chord = ['I', 'I', 'ii6', 'V6']
-rhythm = [6, 8, 7, 6]
+# chord = ['I', 'I', 'ii6', 'V6']
+# rhythm = [6, 8, 7, 6]
 
-predict_note(chord, rhythm)
+# predict_note(chord, rhythm, 1)
 
 # print('selected: ', select)
 # print('tiles: ', tile)
